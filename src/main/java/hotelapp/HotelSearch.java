@@ -1,5 +1,10 @@
 package hotelapp;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Scanner;
+
 /** The driver class for project 4
  * Copy your project 3 classes to the hotelapp package.
  * The main function should take the following command line arguments:
@@ -18,10 +23,109 @@ package hotelapp;
  * and take instructor's / TA's feedback from a code review into account.
  * Please download the input folder from Canvas.
  */
-public class HotelSearch {
-    public static void main(String[] args) {
-       // FILL IN CODE
 
+public class HotelSearch {
+
+
+    public static void main(String[] args) {
+
+        Map<String, String> arg_map = handleCommandLineArgs(args);  // arguments handled
+
+        ThreadSafeHotelHandler hotelHandler = new ThreadSafeHotelHandler();
+        ThreadSafeReviewHandler reviewHandler = new ThreadSafeReviewHandler();
+
+        FileProcessor fp = new FileProcessor(reviewHandler, Integer.parseInt(arg_map.get("-threads")));
+
+        Hotel[] hotels = fp.parseHotels(arg_map.get("-hotels"));
+        hotelHandler.insertHotels(hotels);
+
+        if(!(arg_map.get("-reviews") == null)){
+            fp.initiateReviewInsertion(arg_map.get("-reviews"));
+            try{
+                fp.shutDownThreads();
+            } catch (Exception e){
+                System.out.println("Some error in threads");
+            }
+        }
+
+
+
+        if(arg_map.get("-output") == null){
+            reviewHandler.setUpWords();
+            processUserQueries(hotelHandler, reviewHandler);
+        }else{
+            String outputFile = arg_map.get("-output");
+            Helper.createOutputFiles(outputFile);
+
+            hotelHandler.writeOutput(reviewHandler, outputFile);
+        }
+    }
+
+    /** This method is responsible for handling the command line argument passed.
+     * @param args the current filepath of review json file
+     * */
+    static Map<String, String> handleCommandLineArgs(String[] args){
+        Map<String, String> arg_map = new HashMap<>();
+        try {
+            for (int i = 0; i < args.length; i += 2) {
+                if (args[i].startsWith("-")) {
+                    arg_map.put(args[i], args[i + 1]);
+                }
+            }
+            if(!arg_map.containsKey("-output")){
+                arg_map.put("-output", null);
+            }
+            if(!arg_map.containsKey("-threads")){
+                arg_map.put("-threads", "1");
+            }
+            if(!arg_map.containsKey("-reviews")){
+                arg_map.put("-reviews", null);
+            }
+
+            if(arg_map.get("-hotels") == null){
+                throw new Exception("Please enter hotel file name.") ;
+            }
+        }catch (Exception e){
+            System.out.println("Invalid arguments, please try again.");
+        }
+        return arg_map;
+    }
+
+    /** This method is responsible for processing user queries and process user input for each query.
+     * @param hotelHandler hotelHandler
+     * @param reviewHandler reviewHandler
+     * */
+    public static void processUserQueries(HotelHandler hotelHandler, ReviewHandler reviewHandler){
+        try{
+            Scanner sc = new Scanner(System.in);
+            do{
+                System.out.println("\nPlease enter any of the below instructions.\nfind <hotelID>, findReviews <hotelID>, findWord <word>  or press Q to quit.");
+                String[] instruction = sc.nextLine().split(" ");
+                if(instruction.length == 2){
+                    switch (instruction[0]){
+                        case "f":
+                            hotelHandler.displayHotel(hotelHandler.findHotelId(instruction[1]));
+                            break;
+                        case "r":
+                            reviewHandler.displayReviews(reviewHandler.findReviewsByHotelId(instruction[1], false));
+                            break;
+                        case "w":
+                            reviewHandler.findWords(instruction[1]);
+                            break;
+                        default:
+                            System.out.println("Please enter a valid instruction.");
+                    }
+                }else {
+                    if(instruction.length == 1 && instruction[0].toLowerCase().equals("q")){
+                        System.out.println("Good bye.");
+                        return;
+                    }
+                    System.out.println("Please enter a valid instruction.");
+                }
+            }while(true);
+        } catch (Exception e){
+            System.out.println("Something went wrong: " + e.getMessage());
+        }
     }
 
 }
