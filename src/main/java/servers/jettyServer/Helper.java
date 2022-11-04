@@ -7,20 +7,8 @@ import com.google.gson.JsonObject;
 import hotelapp.Hotel;
 import hotelapp.Review;
 
-import java.lang.reflect.Array;
 import java.util.ArrayList;
-import java.util.TreeSet;
-
 public class Helper {
-
-    public static Object hotelResponseGenerator (boolean success, String hotelId){
-        JsonObject jsonObject = new JsonObject();
-
-        jsonObject.addProperty("success", success);
-        jsonObject.addProperty("hotelId", hotelId);
-
-        return new Gson().toJson(jsonObject);
-    }
 
     public static Object reviewResponseGenerator (boolean success, ArrayList<Review> reviews){
         JsonObject jsonObject = new JsonObject();
@@ -32,9 +20,39 @@ public class Helper {
         jsonObject.addProperty("success", success);
         jsonObject.addProperty("hotelId", reviews.get(0).getHotelId());
 
-        JsonElement reviewJsonTree = new Gson().toJsonTree(reviews);
-        jsonObject.add("reviews", reviewJsonTree);
+        JsonArray jsonArray = new JsonArray();
+        for(Review review : reviews){
+            JsonObject reviewObject = new JsonObject();
+            reviewObject.addProperty("reviewId", review.getReviewId());
+            reviewObject.addProperty("title", review.getTitle());
+            reviewObject.addProperty("user", review.getUserNickname());
+            reviewObject.addProperty("reviewText", review.getReviewText());
+            reviewObject.addProperty("date", review.getReviewSubmissionDate().toString());
+            jsonArray.add(reviewObject);
+        }
+        jsonObject.add("reviews", jsonArray);
         return jsonObject;
     }
+
+    public static Object hotelResponseGenerator (boolean success, Hotel hotel){
+        JsonObject jsonObject = new JsonObject();
+        if(!success){
+            jsonObject.addProperty("success", false);
+            jsonObject.addProperty("hotelId", "invalid");
+            return jsonObject;
+        }
+        jsonObject.addProperty("success", success);
+        jsonObject.addProperty("hotelId", hotel.getId());
+        jsonObject.addProperty("name", hotel.getName());
+        jsonObject.addProperty("addr", hotel.getAddress());
+        jsonObject.addProperty("city", hotel.getCity());
+        jsonObject.addProperty("state", hotel.getState());
+        jsonObject.addProperty("lat", hotel.getLatitude());
+        jsonObject.addProperty("lon", hotel.getLongitude());
+
+
+        return jsonObject;
+    }
+
 
 }

@@ -15,16 +15,15 @@ public class Hotel implements Comparable<Hotel> {
     @SerializedName("pr")
     private String state;
 
-    private Double latitude;
-
-    private Double longitude;
-
+    private LL ll;
+    class LL {
+        public String lat;
+        public String lng;
+    }
     public Hotel(String name, String id, String address, Double lat, Double lng, String city, String state){
         this.name = name;
         this.id = id;
         this.address = address;
-        this.latitude = lat;
-        this.longitude = lng;
         this.city = city;
         this.state = state;
 
@@ -37,11 +36,11 @@ public class Hotel implements Comparable<Hotel> {
     public String getName(){
         return this.name;
     }
-    public Double getLatitude(){
-        return this.latitude;
+    public String  getLatitude(){
+        return this.ll.lat;
     }
-    public Double getLongitude(){
-        return this.longitude;
+    public String getLongitude(){
+        return this.ll.lng;
     }
     public String getAddress(){
         return this.address;

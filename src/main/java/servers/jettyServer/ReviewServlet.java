@@ -49,7 +49,7 @@ public class ReviewServlet extends HttpServlet {
             TreeSet<Review> allReviews = tsReviewHandler.findReviewsByHotelId(hotelId, true);
 
             requiredCount = Math.min(requiredCount, allReviews.size());
-            ArrayList<Review> requiredReviews = new ArrayList<Review>();
+            ArrayList<Review> requiredReviews = new ArrayList<>();
             int count = 0;
             for(Review review : allReviews){
                 if(count == requiredCount){

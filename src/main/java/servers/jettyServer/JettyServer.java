@@ -34,7 +34,7 @@ public class JettyServer {
         // FILL IN CODE:
         // Map end points to servlets
         handler.addServlet(ReviewServlet.class,"/reviews" );
-        handler.addServlet(HotelServlet.class,"/hotels" );
+        handler.addServlet(HotelServlet.class,"/hotelInfo" );
 
         // Note: you should also create servlet classes in this package
         handler.setAttribute("reviewController", tsReviewHandler );

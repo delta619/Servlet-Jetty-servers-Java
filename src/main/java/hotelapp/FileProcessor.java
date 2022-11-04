@@ -70,6 +70,7 @@ public class FileProcessor {
             JsonArray jsonArr = jo.getAsJsonArray("sr");
             Hotel[] hotels = gson.fromJson(jsonArr, Hotel[].class);
 
+
         return hotels;
 
         } catch (IOException e) {
