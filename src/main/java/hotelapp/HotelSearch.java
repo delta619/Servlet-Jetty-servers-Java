@@ -43,18 +43,26 @@ public class HotelSearch {
 
         fp.initiateReviewInsertion(arg_map.get("-reviews"));
 
-        try{
-            fp.shutDownThreads();
-            reviewHandler.setUpWords();
-            runServer(hotelHandler, reviewHandler);
+
+        if(!(arg_map.get("-reviews") == null)){
+            fp.initiateReviewInsertion(arg_map.get("-reviews"));
+            try{
+                fp.shutDownThreads();
             } catch (Exception e){
-                System.out.println("Error while running server");
+                System.out.println("Some error in threads");
             }
+        }
 
 
+        if(arg_map.get("-output") == null){
+            reviewHandler.setUpWords();
+            runJettyServer(hotelHandler, reviewHandler, threads);
+        }else{
+            String outputFile = arg_map.get("-output");
+            Helper.createOutputFiles(outputFile);
+            hotelHandler.writeOutput(reviewHandler, outputFile);
+        }
 
-
-        processUserQueries(hotelHandler, reviewHandler);
     }
 
     /** This method is responsible for handling the command line argument passed.
@@ -68,8 +76,11 @@ public class HotelSearch {
                     arg_map.put(args[i], args[i + 1]);
                 }
             }
-            if(!arg_map.containsKey("-threads")){
+            if(!arg_map.containsKey("-threads")) {
                 arg_map.put("-threads", "1");
+            }
+            if(!arg_map.containsKey("-output")){
+                arg_map.put("-output", null);
             }
             if(!arg_map.containsKey("-reviews")){
                 arg_map.put("-reviews", null);
@@ -120,11 +131,13 @@ public class HotelSearch {
         }
     }
 
-    public static void runServer(ThreadSafeHotelHandler tsHotelHandler, ThreadSafeReviewHandler tsReviewHandler) throws Exception {
-        JettyServer jettyServer = new JettyServer(tsHotelHandler, tsReviewHandler);
-        jettyServer.start();
-//        jettyServer.addMapping("reviews", HotelHandlerServer.class.toString());
-//        jettyServer.addMapping("hotels", HotelHandlerServer.class.toString());
-
+    public static void runJettyServer(ThreadSafeHotelHandler tsHotelHandler, ThreadSafeReviewHandler tsReviewHandler, int threads){
+        try{
+            JettyServer server = new JettyServer(tsHotelHandler, tsReviewHandler);
+            server.start();
+        } catch (Exception e) {
+            System.out.println("Error in starting server: " + e.getMessage());
+            e.printStackTrace();
+        }
     }
 }
