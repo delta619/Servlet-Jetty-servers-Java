@@ -10,6 +10,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Phaser;
@@ -78,7 +79,7 @@ public class FileProcessor {
     }
 
     /** This method is responsible for traversing through review files and submitting worker of each file to a thread.
-     * @param filepath the filepath of review json file
+     * @param directory the filepath of review json file
      * */
     public void traverseReviewFiles(String directory) {
         if(directory == null)return;
@@ -100,14 +101,14 @@ public class FileProcessor {
     }
 
     /** This method is called from the main method regarding initiation the review insertion.
-     * @param directory the initial directory to start traversing.
+     * @param parentReviewPath the initial directory to start traversing.
      * */
     public void initiateReviewInsertion(String parentReviewPath){
         traverseReviewFiles(parentReviewPath);
     }
 
     /** This method is responsible for parsing each review file and inserting it to threadsafe review handler.
-     * @param filepath the current filepath of review json file
+     * @param currReviewPath the current filepath of review json file
      * */
     public void parseReviews(String currReviewPath){
         ArrayList<Review> reviews = new ArrayList<>();

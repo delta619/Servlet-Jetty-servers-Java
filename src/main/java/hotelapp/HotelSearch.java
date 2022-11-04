@@ -1,6 +1,7 @@
 package hotelapp;
 
-import java.util.ArrayList;
+import servers.jettyServer.JettyServer;
+
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Scanner;
@@ -30,35 +31,30 @@ public class HotelSearch {
     public static void main(String[] args) {
 
         Map<String, String> arg_map = handleCommandLineArgs(args);  // arguments handled
+        int threads = Integer.parseInt(arg_map.get("-threads"));
 
         ThreadSafeHotelHandler hotelHandler = new ThreadSafeHotelHandler();
         ThreadSafeReviewHandler reviewHandler = new ThreadSafeReviewHandler();
 
-        FileProcessor fp = new FileProcessor(reviewHandler, Integer.parseInt(arg_map.get("-threads")));
+        FileProcessor fp = new FileProcessor(reviewHandler, threads);
 
         Hotel[] hotels = fp.parseHotels(arg_map.get("-hotels"));
         hotelHandler.insertHotels(hotels);
 
-        if(!(arg_map.get("-reviews") == null)){
-            fp.initiateReviewInsertion(arg_map.get("-reviews"));
-            try{
-                fp.shutDownThreads();
+        fp.initiateReviewInsertion(arg_map.get("-reviews"));
+
+        try{
+            fp.shutDownThreads();
+//            reviewHandler.setUpWords();
+            runServer(hotelHandler, reviewHandler);
             } catch (Exception e){
-                System.out.println("Some error in threads");
+                System.out.println("Error while running server");
             }
-        }
 
 
 
-        if(arg_map.get("-output") == null){
-            reviewHandler.setUpWords();
-            processUserQueries(hotelHandler, reviewHandler);
-        }else{
-            String outputFile = arg_map.get("-output");
-            Helper.createOutputFiles(outputFile);
 
-            hotelHandler.writeOutput(reviewHandler, outputFile);
-        }
+        processUserQueries(hotelHandler, reviewHandler);
     }
 
     /** This method is responsible for handling the command line argument passed.
@@ -72,16 +68,12 @@ public class HotelSearch {
                     arg_map.put(args[i], args[i + 1]);
                 }
             }
-            if(!arg_map.containsKey("-output")){
-                arg_map.put("-output", null);
-            }
             if(!arg_map.containsKey("-threads")){
                 arg_map.put("-threads", "1");
             }
             if(!arg_map.containsKey("-reviews")){
                 arg_map.put("-reviews", null);
             }
-
             if(arg_map.get("-hotels") == null){
                 throw new Exception("Please enter hotel file name.") ;
             }
@@ -95,7 +87,7 @@ public class HotelSearch {
      * @param hotelHandler hotelHandler
      * @param reviewHandler reviewHandler
      * */
-    public static void processUserQueries(HotelHandler hotelHandler, ReviewHandler reviewHandler){
+    public static void processUserQueries(ThreadSafeHotelHandler hotelHandler, ThreadSafeReviewHandler reviewHandler){
         try{
             Scanner sc = new Scanner(System.in);
             do{
@@ -107,7 +99,7 @@ public class HotelSearch {
                             hotelHandler.displayHotel(hotelHandler.findHotelId(instruction[1]));
                             break;
                         case "r":
-                            reviewHandler.displayReviews(reviewHandler.findReviewsByHotelId(instruction[1], false));
+                            ReviewHandler.displayReviews(reviewHandler.findReviewsByHotelId(instruction[1], false));
                             break;
                         case "w":
                             reviewHandler.findWords(instruction[1]);
@@ -116,7 +108,7 @@ public class HotelSearch {
                             System.out.println("Please enter a valid instruction.");
                     }
                 }else {
-                    if(instruction.length == 1 && instruction[0].toLowerCase().equals("q")){
+                    if(instruction.length == 1 && instruction[0].equalsIgnoreCase("q")){
                         System.out.println("Good bye.");
                         return;
                     }
@@ -128,4 +120,11 @@ public class HotelSearch {
         }
     }
 
+    public static void runServer(ThreadSafeHotelHandler tsHotelHandler, ThreadSafeReviewHandler tsReviewHandler) throws Exception {
+        JettyServer jettyServer = new JettyServer(tsHotelHandler, tsReviewHandler);
+        jettyServer.start();
+//        jettyServer.addMapping("reviews", HotelHandlerServer.class.toString());
+//        jettyServer.addMapping("hotels", HotelHandlerServer.class.toString());
+
+    }
 }

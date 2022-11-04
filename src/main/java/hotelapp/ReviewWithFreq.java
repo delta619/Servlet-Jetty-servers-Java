@@ -1,6 +1,7 @@
 package hotelapp;
 
 import java.time.LocalDate;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeMap;
@@ -38,7 +39,7 @@ public class ReviewWithFreq implements Comparable<ReviewWithFreq> {
     public String getReviewId(){
         return this.review.getReviewId();
     }
-    public LocalDate getReviewSubmissionDate(){
+    public String getReviewSubmissionDate(){
         return this.review.getReviewSubmissionDate();
     }
     public String toString() {

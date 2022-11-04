@@ -1,12 +1,11 @@
 package hotelapp;
 
-import java.util.concurrent.locks.ReentrantLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 /**
  * This Class manages the methods of its parent class HotelHandler in a thread safe way.
  * */
-public class ThreadSafeHotelHandler extends HotelHandler{
+public class ThreadSafeHotelHandler extends HotelHandler {
 
 
     private ReentrantReadWriteLock lock;
