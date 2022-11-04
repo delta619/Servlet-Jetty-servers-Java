@@ -82,4 +82,21 @@ public class Helper {
         return jsonObject;
 
     }
+
+    public static Object weatherResponseGenerator (boolean success, Hotel hotel, String temperature, String windspeed){
+        JsonObject jsonObject = new JsonObject();
+        if(!success){
+            jsonObject.addProperty("success", false);
+            jsonObject.addProperty("hotelId", "invalid");
+            return jsonObject;
+        }
+        jsonObject.addProperty("success", success);
+        jsonObject.addProperty("hotelId", hotel.getId());
+        jsonObject.addProperty("name", hotel.getName());
+        jsonObject.addProperty("temperature", temperature);
+        jsonObject.addProperty("windspeed", windspeed);
+
+        return jsonObject;
+    }
+
 }

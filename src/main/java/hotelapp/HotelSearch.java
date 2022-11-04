@@ -45,7 +45,7 @@ public class HotelSearch {
 
         try{
             fp.shutDownThreads();
-            reviewHandler.setUpWords();
+//            reviewHandler.setUpWords();
             runServer(hotelHandler, reviewHandler);
             } catch (Exception e){
                 System.out.println("Error while running server");

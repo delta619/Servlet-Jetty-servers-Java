@@ -36,6 +36,7 @@ public class JettyServer {
         handler.addServlet(ReviewServlet.class,"/reviews" );
         handler.addServlet(HotelServlet.class,"/hotelInfo" );
         handler.addServlet(IndexServlet.class,"/index" );
+        handler.addServlet(WeatherInfo.class,"/weather" );
 
 
         // Note: you should also create servlet classes in this package
