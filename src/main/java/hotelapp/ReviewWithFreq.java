@@ -24,6 +24,14 @@ public class ReviewWithFreq implements Comparable<ReviewWithFreq> {
         return frequency;
     }
 
+    public String getTitle() {
+        return review.getTitle();
+    }
+
+    public String getNickname() {
+        return review.getUserNickname();
+    }
+
     public int getWordFrequency(String word){
         return this.wordFrequency.get(word);
     }

@@ -1,5 +1,7 @@
 package hotelapp;
 
+import com.sun.source.tree.Tree;
+
 import java.io.*;
 import java.util.*;
 
@@ -93,15 +95,12 @@ public class ReviewHandler {
         return m;
     }
 
-    public void findWords(String word){
-        word = word.toLowerCase(); // convert to lowercase before findind in hashmap because keys are stored in lowercase
-        if(!wordToReviews.containsKey(word)){
-            System.out.println("No reviews found with word " + word);
-            return;
+    public ArrayList<ReviewWithFreq> findWords(String word){
+        word = word.toLowerCase();
+        if(wordToReviews.containsKey(word)){
+            return new ArrayList<>(wordToReviews.get(word));
         }
-        for(ReviewWithFreq review: wordToReviews.get(word)){
-            System.out.println(review);
-        }
+        return new ArrayList<>();
     }
 
     /**

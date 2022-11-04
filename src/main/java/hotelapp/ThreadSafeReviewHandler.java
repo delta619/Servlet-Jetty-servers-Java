@@ -46,4 +46,15 @@ public class ThreadSafeReviewHandler extends ReviewHandler {
         }
     }
 
+    @Override
+    public ArrayList<ReviewWithFreq> findWords(String word){
+        try{
+            lock.readLock().lock();
+            return super.findWords(word);
+        } finally {
+            lock.readLock().unlock();
+        }
+    }
+
+
 }

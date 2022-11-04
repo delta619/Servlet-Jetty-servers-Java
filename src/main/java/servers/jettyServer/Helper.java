@@ -6,6 +6,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import hotelapp.Hotel;
 import hotelapp.Review;
+import hotelapp.ReviewWithFreq;
 
 import java.util.ArrayList;
 public class Helper {
@@ -55,4 +56,30 @@ public class Helper {
     }
 
 
+    public static Object wordResponseGenerator (boolean success, String word, ArrayList<ReviewWithFreq> reviews){
+
+        JsonObject jsonObject = new JsonObject();
+        if(!success){
+            jsonObject.addProperty("success", false);
+            jsonObject.addProperty("word", "invalid");
+            return jsonObject;
+        }
+        jsonObject.addProperty("success", success);
+        jsonObject.addProperty("word", word);
+
+        JsonArray jsonArray = new JsonArray();
+        for(ReviewWithFreq review : reviews){
+            JsonObject reviewObject = new JsonObject();
+            reviewObject.addProperty("reviewId", review.getReviewId());
+            reviewObject.addProperty("title", review.getTitle());
+            reviewObject.addProperty("user", review.getNickname());
+            reviewObject.addProperty("reviewText", review.getReviewText());
+            reviewObject.addProperty("date", review.getReviewSubmissionDate().toString());
+
+            jsonArray.add(reviewObject);
+        }
+        jsonObject.add("reviews", jsonArray);
+        return jsonObject;
+
+    }
 }
