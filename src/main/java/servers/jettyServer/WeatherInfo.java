@@ -2,6 +2,7 @@ package servers.jettyServer;
 
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import hotelapp.Hotel;
 import hotelapp.ThreadSafeHotelHandler;
 import org.apache.commons.text.StringEscapeUtils;
 
@@ -24,22 +25,19 @@ public class WeatherInfo extends HttpServlet {
 
          // get latitude and longitude from request
         try{
-            String latitude = request.getParameter("lat");
-            String longitude = request.getParameter("lng");
             String hotelId = request.getParameter("hotelId");
 
             PrintWriter out = response.getWriter();
 
-            latitude = StringEscapeUtils.escapeHtml4(latitude);
-            longitude = StringEscapeUtils.escapeHtml4(longitude);
             hotelId = StringEscapeUtils.escapeHtml4(hotelId);
-
-            if(latitude == null || longitude == null || hotelId == null || tsHotelHandler.findHotelId(hotelId) == null){
-                response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-                out.println(Helper.weatherResponseGenerator(false, null, "NA", "NA"));
+            Hotel hotel = tsHotelHandler.findHotelId(hotelId);
+            if(hotel == null){
+                response.setStatus(HttpServletResponse.SC_NOT_FOUND);
+                out.print(Helper.hotelResponseGenerator(false, null));
                 return;
             }
-            String[] weatherInfo = getWeatherInfo(latitude, longitude);
+
+            String[] weatherInfo = getWeatherInfo(hotel.getLatitude(), hotel.getLongitude());
             out.println(Helper.weatherResponseGenerator(true, tsHotelHandler.findHotelId(hotelId), weatherInfo[0], weatherInfo[1]));
 
         } catch (IOException e) {
