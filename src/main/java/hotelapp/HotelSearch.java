@@ -1,5 +1,7 @@
 package hotelapp;
 
+import servers.httpServer.HotelHandler;
+import servers.httpServer.HttpServer;
 import servers.jettyServer.JettyServer;
 
 import java.util.HashMap;
@@ -44,20 +46,22 @@ public class HotelSearch {
         fp.initiateReviewInsertion(arg_map.get("-reviews"));
 
 
-        if(!(arg_map.get("-reviews") == null)){
+        if (!(arg_map.get("-reviews") == null)) {
             fp.initiateReviewInsertion(arg_map.get("-reviews"));
-            try{
+            try {
                 fp.shutDownThreads();
-            } catch (Exception e){
+            } catch (Exception e) {
                 System.out.println("Some error in threads");
             }
         }
 
 
-        if(arg_map.get("-output") == null){
+        if (arg_map.get("-output") == null) {
             reviewHandler.setUpWords();
-            runJettyServer(hotelHandler, reviewHandler, threads);
-        }else{
+//            runJettyServer(hotelHandler, reviewHandler, threads);
+            runHttpServer(hotelHandler, reviewHandler, threads);
+
+        } else {
             String outputFile = arg_map.get("-output");
             Helper.createOutputFiles(outputFile);
             hotelHandler.writeOutput(reviewHandler, outputFile);
@@ -65,10 +69,12 @@ public class HotelSearch {
 
     }
 
-    /** This method is responsible for handling the command line argument passed.
+    /**
+     * This method is responsible for handling the command line argument passed.
+     *
      * @param args the current filepath of review json file
-     * */
-    static Map<String, String> handleCommandLineArgs(String[] args){
+     */
+    static Map<String, String> handleCommandLineArgs(String[] args) {
         Map<String, String> arg_map = new HashMap<>();
         try {
             for (int i = 0; i < args.length; i += 2) {
@@ -76,36 +82,38 @@ public class HotelSearch {
                     arg_map.put(args[i], args[i + 1]);
                 }
             }
-            if(!arg_map.containsKey("-threads")) {
+            if (!arg_map.containsKey("-threads")) {
                 arg_map.put("-threads", "1");
             }
-            if(!arg_map.containsKey("-output")){
+            if (!arg_map.containsKey("-output")) {
                 arg_map.put("-output", null);
             }
-            if(!arg_map.containsKey("-reviews")){
+            if (!arg_map.containsKey("-reviews")) {
                 arg_map.put("-reviews", null);
             }
-            if(arg_map.get("-hotels") == null){
-                throw new Exception("Please enter hotel file name.") ;
+            if (arg_map.get("-hotels") == null) {
+                throw new Exception("Please enter hotel file name.");
             }
-        }catch (Exception e){
+        } catch (Exception e) {
             System.out.println("Invalid arguments, please try again.");
         }
         return arg_map;
     }
 
-    /** This method is responsible for processing user queries and process user input for each query.
-     * @param hotelHandler hotelHandler
+    /**
+     * This method is responsible for processing user queries and process user input for each query.
+     *
+     * @param hotelHandler  hotelHandler
      * @param reviewHandler reviewHandler
-     * */
-    public static void processUserQueries(ThreadSafeHotelHandler hotelHandler, ThreadSafeReviewHandler reviewHandler){
-        try{
+     */
+    public static void processUserQueries(ThreadSafeHotelHandler hotelHandler, ThreadSafeReviewHandler reviewHandler) {
+        try {
             Scanner sc = new Scanner(System.in);
-            do{
+            do {
                 System.out.println("\nPlease enter any of the below instructions.\nfind <hotelID>, findReviews <hotelID>, findWord <word>  or press Q to quit.");
                 String[] instruction = sc.nextLine().split(" ");
-                if(instruction.length == 2){
-                    switch (instruction[0]){
+                if (instruction.length == 2) {
+                    switch (instruction[0]) {
                         case "f":
                             hotelHandler.displayHotel(hotelHandler.findHotelId(instruction[1]));
                             break;
@@ -118,22 +126,33 @@ public class HotelSearch {
                         default:
                             System.out.println("Please enter a valid instruction.");
                     }
-                }else {
-                    if(instruction.length == 1 && instruction[0].equalsIgnoreCase("q")){
+                } else {
+                    if (instruction.length == 1 && instruction[0].equalsIgnoreCase("q")) {
                         System.out.println("Good bye.");
                         return;
                     }
                     System.out.println("Please enter a valid instruction.");
                 }
-            }while(true);
-        } catch (Exception e){
+            } while (true);
+        } catch (Exception e) {
             System.out.println("Something went wrong: " + e.getMessage());
         }
     }
 
-    public static void runJettyServer(ThreadSafeHotelHandler tsHotelHandler, ThreadSafeReviewHandler tsReviewHandler, int threads){
-        try{
+    public static void runJettyServer(ThreadSafeHotelHandler tsHotelHandler, ThreadSafeReviewHandler tsReviewHandler, int threads) {
+        try {
             JettyServer server = new JettyServer(tsHotelHandler, tsReviewHandler);
+            server.start();
+        } catch (Exception e) {
+            System.out.println("Error in starting server: " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
+
+    public static void runHttpServer(ThreadSafeHotelHandler tsHotelHandler, ThreadSafeReviewHandler tsReviewHandler, int threads) {
+        try {
+            HttpServer server = new HttpServer(threads);
+            server.addMapping("/hotel", HotelHandler.class.toString());
             server.start();
         } catch (Exception e) {
             System.out.println("Error in starting server: " + e.getMessage());
