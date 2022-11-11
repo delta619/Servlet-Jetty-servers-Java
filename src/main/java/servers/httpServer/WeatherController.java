@@ -1,50 +1,23 @@
-package servers.jettyServer;
+package servers.httpServer;
 
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import hotelapp.Hotel;
 import hotelapp.ThreadSafeHotelHandler;
-import org.apache.commons.text.StringEscapeUtils;
 
 import javax.net.ssl.SSLSocket;
 import javax.net.ssl.SSLSocketFactory;
-import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import java.io.*;
 import java.net.URL;
+import java.util.HashMap;
 
-public class WeatherInfo extends HttpServlet {
+import static servers.httpServer.HttpRequest.send405Response;
+
+public class WeatherController implements HttpHandler {
     private static final String host = "https://api.open-meteo.com/";
+    ThreadSafeHotelHandler threadSafeHotelHandler;
 
-    @Override
-    protected void doGet(HttpServletRequest request, HttpServletResponse response) {
-        // set json response
-        response.setContentType("application/json");
-        ThreadSafeHotelHandler tsHotelHandler = (ThreadSafeHotelHandler) getServletContext().getAttribute("hotelController");
 
-         // get latitude and longitude from request
-        try{
-            String hotelId = request.getParameter("hotelId");
-
-            PrintWriter out = response.getWriter();
-
-            hotelId = StringEscapeUtils.escapeHtml4(hotelId);
-            Hotel hotel = tsHotelHandler.findHotelId(hotelId);
-            if(hotel == null){
-                response.setStatus(HttpServletResponse.SC_NOT_FOUND);
-                out.print(Helper.hotelResponseGenerator(false, null));
-                return;
-            }
-
-            String[] weatherInfo = getWeatherInfo(hotel.getLatitude(), hotel.getLongitude());
-            out.println(Helper.weatherResponseGenerator(true, tsHotelHandler.findHotelId(hotelId), weatherInfo[0], weatherInfo[1]));
-
-        } catch (IOException e) {
-            e.printStackTrace();
-
-        }
-    }
     public String[] getWeatherInfo(String latitude, String longitude) {
         PrintWriter out = null;
         BufferedReader in = null;
@@ -103,7 +76,7 @@ public class WeatherInfo extends HttpServlet {
 
         }
 
-       return new String[]{"NA", "NA"}; // 0 -> temperature 1 -> windspeed
+        return new String[]{"NA", "NA"};
     }
     public boolean checkBrack(String s){
         // if string contains curly braces, return true
@@ -113,7 +86,6 @@ public class WeatherInfo extends HttpServlet {
         }
         return false;
     };
-
 
     private static String getRequest(String host, String pathResourceQuery) {
         String request = "GET " + pathResourceQuery + " HTTP/1.1" + System.lineSeparator() // GET
@@ -125,5 +97,57 @@ public class WeatherInfo extends HttpServlet {
         return request;
     }
 
+    private void getHotelInfo(HttpRequest request, PrintWriter writer) {
+        // /weather?hotelId=25622
+        try{
+            String hotelId = request.params.get("hotelId");
+            if(hotelId == null){
+                HttpRequest.send404JsonResponse("hotelId", writer);
+                return;
+            }
+            Hotel hotel = threadSafeHotelHandler.findHotelId(hotelId);
+            if(hotel == null){
+                HttpRequest.send404JsonResponse("hotelId", writer);
+                return;
+            }
+            String lat = hotel.getLatitude();
+            String lon = hotel.getLongitude();
 
+            String[] weatherInfo = getWeatherInfo(lat, lon);
+            String temperature = weatherInfo[0];
+            String windspeed = weatherInfo[1];
+
+            JsonObject jsonObject = new JsonObject();
+            jsonObject.addProperty("hotelId", hotel.getId());
+            jsonObject.addProperty("name", hotel.getName());
+            jsonObject.addProperty("temperature", temperature);
+            jsonObject.addProperty("windspeed", windspeed);
+
+            HttpRequest.sendSuccessJsonResponse(jsonObject, writer);
+
+
+        } catch (Exception e){
+            e.printStackTrace();
+            HttpRequest.send405Response(null, writer);
+        }
+    }
+    @Override
+    public void processRequest(HttpRequest request, PrintWriter writer) {
+
+        if(request.method.equals("GET")){
+            getHotelInfo(request, writer);
+            return;
+
+        }
+
+        send405Response("method", writer);
+    }
+
+    @Override
+    public void setAttribute(Object data) {
+        HashMap<String, Object> dataMap = (HashMap<String, Object>) data;
+
+        assert dataMap.get(ThreadSafeHotelHandler.class.getName()) instanceof ThreadSafeHotelHandler;
+        threadSafeHotelHandler = (ThreadSafeHotelHandler) dataMap.get(ThreadSafeHotelHandler.class.getName());
+    }
 }

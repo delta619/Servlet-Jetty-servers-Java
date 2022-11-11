@@ -1,5 +1,9 @@
 package hotelapp;
 
+import servers.httpServer.HotelController;
+import servers.httpServer.HttpHandler;
+import servers.httpServer.HttpServer;
+import servers.httpServer.ReviewController;
 import servers.jettyServer.JettyServer;
 
 import java.util.HashMap;
@@ -56,7 +60,8 @@ public class HotelSearch {
 
         if(arg_map.get("-output") == null){
             reviewHandler.setUpWords();
-            runJettyServer(hotelHandler, reviewHandler, threads);
+//            runJettyServer(hotelHandler, reviewHandler, threads);
+            runHttpServer(hotelHandler, reviewHandler, threads);
         }else{
             String outputFile = arg_map.get("-output");
             Helper.createOutputFiles(outputFile);
@@ -131,6 +136,15 @@ public class HotelSearch {
         }
     }
 
+    public static void runHttpServer(ThreadSafeHotelHandler tsHotelHandler, ThreadSafeReviewHandler tsReviewHandler, int threads) {
+
+        HttpServer server = new HttpServer(3);
+        server.addMapping(ThreadSafeHotelHandler.class.getName(), tsHotelHandler);
+        server.addMapping(ThreadSafeReviewHandler.class.getName(), tsReviewHandler);
+        server.setAttributeControllers();
+        server.start();
+
+    }
     public static void runJettyServer(ThreadSafeHotelHandler tsHotelHandler, ThreadSafeReviewHandler tsReviewHandler, int threads){
         try{
             JettyServer server = new JettyServer(tsHotelHandler, tsReviewHandler);
