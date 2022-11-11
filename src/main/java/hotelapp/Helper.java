@@ -47,15 +47,19 @@ public class Helper {
      * @param outputFile the output file name.
      * */
     public static void createOutputFiles(String outputFile){
-
-        File myObj1 = new File(outputFile);
-
+        // if outputfile has a directory, create the directory
+        String[] path = outputFile.split("/");
+        String dir = "";
+        for(int i = 0; i < path.length - 1; i++){
+            dir += path[i] + "/";
+        }
+        File directory = new File(dir);
+        if(!directory.exists()){
+            directory.mkdirs();
+        }
         try {
-            myObj1.createNewFile();
-
-            PrintWriter writer1 = new PrintWriter(outputFile);
-            writer1.close();
-
+            File file = new File(outputFile);
+            file.createNewFile();
 
         } catch (IOException e) {
             System.out.println("An error occurred.");

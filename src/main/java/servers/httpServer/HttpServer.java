@@ -23,15 +23,28 @@ public class HttpServer {
     private ExecutorService poolOfThreads;
 
     private  Map<String, Object> attributesMap = new HashMap<>();
-    private  HttpHandler hotelController = new HotelController();
-    private  HttpHandler reviewController = new ReviewController();
-    private  HttpHandler indexController = new IndexController();
-    private HttpHandler weatherController = new WeatherController();
+    private  HttpHandler hotelController = new HotelHandler();
+    private  HttpHandler reviewController = new ReviewHandler();
+    private  HttpHandler indexController = new IndexHandler();
+    private HttpHandler weatherController = new WeatherHandler();
 
     public HttpServer(int threads) {
         isServerActive = true;
         poolOfThreads = Executors.newFixedThreadPool(threads);
-        phaser = new Phaser();
+    }
+    public void start() {
+        try{
+            ServerSocket server = new ServerSocket(port);
+            while(isServerActive) {
+                System.out.println("Waiting for connection");
+                Socket socket = server.accept();
+                poolOfThreads.submit(new RequestWorker(socket));
+            }
+
+        } catch (Exception e) {
+            System.out.println("Error in starting server");
+            e.printStackTrace();
+        }
     }
 
     public void addMapping(String key, Object value){
@@ -45,7 +58,7 @@ public class HttpServer {
         weatherController.setAttribute(attributesMap);
     }
 
-    private void processIncomingRequest(String input, PrintWriter out){
+    private void processRequestEntry(String input, PrintWriter out){
 
         HttpRequest request = new HttpRequest(input);
 
@@ -71,25 +84,10 @@ public class HttpServer {
 
     }
 
-    public void start() {
-        try{
-            ServerSocket server = new ServerSocket(port);
-            while(isServerActive) {
-                System.out.println("Waiting for connection");
-                Socket socket = server.accept();
-                phaser.register();
-                poolOfThreads.submit(new ClientTask(socket));
-            }
-
-        } catch (Exception e) {
-            System.out.println("Error in starting server");
-            e.printStackTrace();
-        }
-    }
-    private class ClientTask implements Runnable {
+    private class RequestWorker implements Runnable {
         private final Socket connectionSocket;
 
-        private ClientTask(Socket connectionSocket) {
+        private RequestWorker(Socket connectionSocket) {
             this.connectionSocket = connectionSocket;
         }
 
@@ -104,10 +102,8 @@ public class HttpServer {
                 while (!connectionSocket.isClosed()) {
                     input = reader.readLine();
                         if(input.startsWith("GET") || input.startsWith("POST")) {
-                            System.out.println("Server: Received request: " + input);
-                            processIncomingRequest(input, out);
+                            processRequestEntry(input, out);
                             connectionSocket.close();
-                            phaser.arriveAndDeregister();
                         }
                 }
             } catch (IOException e) {

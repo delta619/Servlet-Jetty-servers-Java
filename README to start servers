@@ -1,0 +1,2 @@
+To start Http server  -> java -jar httpServer.jar -hotels input/hotels/hotels.json -reviews input/reviews -threads 4
+To start Jetty server -> java -jar jettyServer.jar -hotels input/hotels/hotels.json -reviews input/reviews -threads 4

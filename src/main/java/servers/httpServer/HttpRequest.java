@@ -45,7 +45,7 @@ public class HttpRequest {
         writer.println();
         writer.println(json);
         writer.flush();
-//        Logger.getLogger("HttpRequest").info("Response: " + json);
+        Logger.getLogger("HttpRequest").info("Response: " + json);
     }
 
 
@@ -72,7 +72,7 @@ public class HttpRequest {
         json.addProperty(key, "invalid");
 
         writer.println("HTTP/1.1 405 Bad Request");
-        writer.println("Content-Type: text/plain");
+        writer.println("Content-Type: application/json");
         writer.println();
         writer.println(json);
         writer.flush();
