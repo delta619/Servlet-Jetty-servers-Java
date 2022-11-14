@@ -1,5 +1,7 @@
 package hotelapp;
 
+import com.google.gson.JsonObject;
+
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 /**
@@ -19,6 +21,16 @@ public class ThreadSafeHotelHandler extends HotelHandler {
         try{
             this.lock.readLock().lock();
             return super.findHotelId(hotelId);
+        }
+        finally {
+            this.lock.readLock().unlock();
+        }
+    }
+    @Override
+    public JsonObject getHotelInfoJson(String hotelId){
+        try{
+            this.lock.readLock().lock();
+            return super.getHotelInfoJson(hotelId);
         }
         finally {
             this.lock.readLock().unlock();

@@ -1,5 +1,8 @@
 package hotelapp;
 
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
+
 import java.time.LocalDate;
 import java.util.Date;
 import java.util.HashMap;
@@ -67,5 +70,15 @@ public class ReviewWithFreq implements Comparable<ReviewWithFreq> {
     @Override
     public int compareTo(ReviewWithFreq o) {
         return getReviewText().compareTo(o.getReviewText());
+    }
+
+    public JsonObject toJson(){
+        JsonObject jsonObject = new JsonObject();
+        jsonObject.addProperty("reviewId", getReviewId());
+        jsonObject.addProperty("title", getTitle());
+        jsonObject.addProperty("user", getNickname());
+        jsonObject.addProperty("reviewText", getReviewText());
+        jsonObject.addProperty("date", getReviewSubmissionDate());
+        return jsonObject;
     }
 }

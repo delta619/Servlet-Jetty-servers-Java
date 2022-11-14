@@ -1,5 +1,7 @@
 package hotelapp;
 
+import com.google.gson.JsonObject;
+
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.Date;
@@ -74,7 +76,16 @@ public class Review implements Comparable<Review> {
         return this.reviewText;
     }
 
-
+    public JsonObject toJson(){
+        JsonObject jsonObject = new JsonObject();
+        jsonObject.addProperty("reviewId", this.getReviewId());
+        jsonObject.addProperty("title", this.getTitle());
+        jsonObject.addProperty("hotelId", this.getHotelId());
+        jsonObject.addProperty("user", this.getUserNickname());
+        jsonObject.addProperty("reviewText", this.getReviewText());
+        jsonObject.addProperty("date", this.getReviewSubmissionDate());
+        return jsonObject;
+    }
     @Override
     public int compareTo(Review o) {
         return getReviewId().compareTo(o.getReviewId());

@@ -1,5 +1,6 @@
 package servers.jettyServer;
 
+import com.google.gson.JsonObject;
 import hotelapp.Hotel;
 import hotelapp.ThreadSafeHotelHandler;
 import org.apache.commons.text.StringEscapeUtils;
@@ -27,13 +28,13 @@ public class HotelServlet extends HttpServlet {
                 return;
             }
             ThreadSafeHotelHandler tsHotelHandler = (ThreadSafeHotelHandler) getServletContext().getAttribute("hotelController");
-            if(tsHotelHandler.findHotelId(hotelId) == null){
+            if(tsHotelHandler.getHotelInfoJson(hotelId) == null){
                 response.setStatus(HttpServletResponse.SC_NOT_FOUND);
                 out.print(Helper.hotelResponseGenerator(false, null));
                 return;
             }
-            Hotel hotel = tsHotelHandler.findHotelId(hotelId);
-            out.print(Helper.hotelResponseGenerator(true, hotel));
+            JsonObject jsonResponse = tsHotelHandler.getHotelInfoJson(hotelId);
+            out.print(Helper.hotelResponseGenerator(true, jsonResponse));
         } catch (Exception e){
             e.printStackTrace();
         }

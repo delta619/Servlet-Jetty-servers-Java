@@ -1,5 +1,6 @@
 package hotelapp;
 
+import com.google.gson.JsonArray;
 import com.sun.source.tree.Tree;
 
 import java.io.*;
@@ -73,6 +74,23 @@ public class ReviewHandler {
         }
         return reviews;
     }
+    public JsonArray findReviewsByHotelIdJson(String hotelId, int numReviews){
+        JsonArray jsonArray = new JsonArray();
+        if(!hotelReviewMap.containsKey(hotelId)){
+            return jsonArray;
+        }
+        TreeSet<Review> reviews = hotelReviewMap.get(hotelId);
+        numReviews = Math.min(numReviews, reviews.size());
+        int count = 0;
+        for(Review review: reviews){
+            if(count == numReviews){
+                break;
+            }
+            jsonArray.add(review.toJson());
+            count++;
+        }
+        return jsonArray;
+    }
 
     public static HashSet<String> getStopWords(){
         HashSet<String> m = new HashSet<>();
@@ -101,6 +119,25 @@ public class ReviewHandler {
             return new ArrayList<>(wordToReviews.get(word));
         }
         return new ArrayList<>();
+    }
+
+    public JsonArray findWordsJson(String word, int numReviews){
+        word = word.toLowerCase();
+        JsonArray jsonArray = new JsonArray();
+        if(!wordToReviews.containsKey(word)){
+            return jsonArray;
+        }
+        TreeSet<ReviewWithFreq> reviews = wordToReviews.get(word);
+        numReviews = Math.min(numReviews, reviews.size());
+        int count = 0;
+        for(ReviewWithFreq review: reviews){
+            if(count == numReviews){
+                break;
+            }
+            jsonArray.add(review.toJson());
+            count++;
+        }
+        return jsonArray;
     }
 
     /**

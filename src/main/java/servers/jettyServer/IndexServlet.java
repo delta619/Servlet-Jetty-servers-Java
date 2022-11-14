@@ -1,5 +1,6 @@
 package servers.jettyServer;
 
+import com.google.gson.JsonArray;
 import hotelapp.Review;
 import hotelapp.ReviewWithFreq;
 import hotelapp.ThreadSafeHotelHandler;
@@ -42,16 +43,9 @@ public class IndexServlet extends HttpServlet {
                 return;
             }
 
-            ArrayList<ReviewWithFreq> allReviews = tsReviewHandler.findWords(word);
+            JsonArray jsonArr = tsReviewHandler.findWordsJson(word, count);
 
-            // get count number or max of reviews from allReviews
-            int max = Math.min(count, allReviews.size());
-            ArrayList<ReviewWithFreq> reviews = new ArrayList<>();
-            for(int i = 0; i < max; i++){
-                reviews.add(allReviews.get(i));
-            }
-
-            out.print(Helper.wordResponseGenerator(true, word, reviews));
+            out.print(Helper.wordResponseGenerator(true, word, jsonArr));
 
         }catch (Exception e){
             e.printStackTrace();

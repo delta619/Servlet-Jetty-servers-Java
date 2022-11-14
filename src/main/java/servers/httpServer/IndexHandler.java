@@ -14,7 +14,6 @@ import static servers.httpServer.HttpRequest.send405Response;
 
 public class IndexHandler implements HttpHandler {
 
-    ThreadSafeHotelHandler threadSafeHotelHandler;
     ThreadSafeReviewHandler threadSafeReviewHandler;
 
     @Override
@@ -40,37 +39,14 @@ public class IndexHandler implements HttpHandler {
             String word = request.params.get("word");
             int num = Integer.parseInt(request.params.get("num"));
 
-            ArrayList<ReviewWithFreq> wordReviewList = threadSafeReviewHandler.findWords(word);
-            if (wordReviewList == null) {
+            JsonArray jsonArr = threadSafeReviewHandler.findWordsJson(word, num);
+            if (jsonArr.size() == 0) {
                 HttpRequest.send404JsonResponse("word", writer);
                 return;
             }
-            num = Math.min(num, wordReviewList.size());
-            ArrayList<ReviewWithFreq> requiredReviews = new ArrayList<>();
-            int count = 0;
-            for (ReviewWithFreq review : wordReviewList) {
-                if (count == num) {
-                    break;
-                }
-                requiredReviews.add(review);
-                count++;
-            }
-
-
             jsonObject.addProperty("word", word);
+            jsonObject.add("reviews", jsonArr);
 
-            JsonArray jsonArray = new JsonArray();
-            for(ReviewWithFreq review : requiredReviews){
-                JsonObject reviewObject = new JsonObject();
-                reviewObject.addProperty("reviewId", review.getReviewId());
-                reviewObject.addProperty("title", review.getTitle());
-                reviewObject.addProperty("user", review.getNickname());
-                reviewObject.addProperty("reviewText", review.getReviewText());
-                reviewObject.addProperty("date", review.getReviewSubmissionDate().toString());
-
-                jsonArray.add(reviewObject);
-            }
-            jsonObject.add("reviews", jsonArray);
             HttpRequest.sendSuccessJsonResponse(jsonObject, writer);
 
         } catch (Exception e) {
@@ -82,13 +58,7 @@ public class IndexHandler implements HttpHandler {
 
     @Override
     public void setAttribute(Object data) {
-        HashMap<String, Object> dataMap = (HashMap<String, Object>) data;
-
-        assert dataMap.get(ThreadSafeHotelHandler.class.getName()) instanceof ThreadSafeHotelHandler;
-        threadSafeHotelHandler = (ThreadSafeHotelHandler) dataMap.get(ThreadSafeHotelHandler.class.getName());
-
-        assert dataMap.get(ThreadSafeReviewHandler.class.getName()) instanceof ThreadSafeReviewHandler;
-        threadSafeReviewHandler = (ThreadSafeReviewHandler) dataMap.get(ThreadSafeReviewHandler.class.getName());
+        this.threadSafeReviewHandler = (ThreadSafeReviewHandler) data;
 
     }
 

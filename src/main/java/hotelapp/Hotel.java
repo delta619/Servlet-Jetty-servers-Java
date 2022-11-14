@@ -1,5 +1,6 @@
 package hotelapp;
 
+import com.google.gson.JsonObject;
 import com.google.gson.annotations.SerializedName;
 
 public class Hotel implements Comparable<Hotel> {

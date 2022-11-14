@@ -13,15 +13,27 @@ public class HttpRequest {
     Map<String, String> params = new HashMap<>();
     String url;
     String method;
+    String route;
 
     HttpRequest(String request) {
         String[] token = request.split(" ");
         method = token[0].trim();
         url = token[1].trim();
+        this.setRoute();
         this.getParams();
-
         Logger.getLogger("HttpRequest").info("Request: " + request);
+    }
 
+    public void setRoute(){
+        if(url.contains("?")){
+            this.route = url.substring(0, url.indexOf("?"));
+        }else{
+            this.route = url;
+        }
+
+    }
+    public String getRoute(){
+        return route;
     }
 
     private void getParams() {
@@ -92,8 +104,6 @@ public class HttpRequest {
         writer.flush();
         Logger.getLogger("HttpRequest").warning("Response: " + json);
     }
-
-
 
     @Override
     public String toString() {

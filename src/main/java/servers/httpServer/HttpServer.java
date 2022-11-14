@@ -17,16 +17,10 @@ public class HttpServer {
 
     private int port = 8080;
     private static boolean isServerActive = false;
-    private String SHUTDOWN = "SHUTDOWN";
-    private String EOT = "EOT";
-    private Phaser phaser;
     private ExecutorService poolOfThreads;
 
-    private  Map<String, Object> attributesMap = new HashMap<>();
-    private  HttpHandler hotelController = new HotelHandler();
-    private  HttpHandler reviewController = new ReviewHandler();
-    private  HttpHandler indexController = new IndexHandler();
-    private HttpHandler weatherController = new WeatherHandler();
+    private Map<String, Object> routeMap = new HashMap<>();
+    private Map<String, Object> ObjectMap = new HashMap<>();
 
     public HttpServer(int threads) {
         isServerActive = true;
@@ -47,41 +41,51 @@ public class HttpServer {
         }
     }
 
-    public void addMapping(String key, Object value){
-        this.attributesMap.put(key, value);
+    public void addRouteMapping(String route, Object controller){
+        this.routeMap.put(route, controller);
     }
 
-    public void setAttributeControllers() {
-        hotelController.setAttribute(attributesMap);
-        reviewController.setAttribute(attributesMap);
-        indexController.setAttribute(attributesMap);
-        weatherController.setAttribute(attributesMap);
+    public void addObjectMapping(String className, Object value) {
+        this.ObjectMap.put(className, value);
     }
 
+    public HttpHandler getController(String route) {
+        try{
+            Class<?> handlerClass = Class.forName(routeMap.get(route).toString());
+            HttpHandler handler = (HttpHandler) handlerClass.newInstance();
+            handler.setAttribute(this.ObjectMap.get(handlerClass.getName()));
+            return  handler;
+
+        }
+        catch (Exception e){
+            System.out.println("Error in getting controller");
+            e.printStackTrace();
+        }
+
+    return null;
+    }
     private void processRequestEntry(String input, PrintWriter out){
+        HttpRequest request;
+        try{
+            request = new HttpRequest(input);
+        } catch (Exception e){
+            HttpRequest.send500Response("url", out);
+            return;
+        }
+        HttpHandler handler = getController(request.getRoute());
 
-        HttpRequest request = new HttpRequest(input);
-
-        if(request.url.startsWith("/hotelInfo")) {
-            hotelController.processRequest(request, out);
-        } else if(request.url.startsWith("/review")) {
-            reviewController.processRequest(request, out);
-        } else if (request.url.startsWith("/index")) {
-            indexController.processRequest(request, out);
-        } else if (request.url.startsWith("/weather")) {
-            weatherController.processRequest(request, out);
+        if(handler != null) {
+            handler.processRequest(request, out);
         }
         else {
-            if(request.method.equals("GET")){
-                HttpRequest.send404JsonResponse("url", out);
-                return;
-            }else{
+            if(request.method.equals("POST")) {
                 HttpRequest.send405Response("method", out);
+            }
+            else {
+                HttpRequest.send404JsonResponse("route", out);
             }
         }
         out.flush();
-
-
     }
 
     private class RequestWorker implements Runnable {

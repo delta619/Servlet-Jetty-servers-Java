@@ -14,7 +14,6 @@ import java.util.TreeSet;
 import static servers.httpServer.HttpRequest.send405Response;
 
 public class ReviewHandler implements HttpHandler{
-    ThreadSafeHotelHandler threadSafeHotelHandler;
     ThreadSafeReviewHandler threadSafeReviewHandler;
 
 
@@ -31,7 +30,6 @@ public class ReviewHandler implements HttpHandler{
     }
 
     private void getHotelReviews(HttpRequest request, PrintWriter writer) {
-        // reviews?hotelId=491&count=5
         try {
             JsonObject jsonObject = new JsonObject();
             if (request.params.get("hotelId") == null || request.params.get("num") == null) {
@@ -41,43 +39,14 @@ public class ReviewHandler implements HttpHandler{
             }
             String hotelId = request.params.get("hotelId");
             int num = Integer.parseInt(request.params.get("num"));
-
-            if (threadSafeHotelHandler.findHotelId(hotelId) == null) {
-                HttpRequest.send404JsonResponse("hotelId", writer);
-                return;
-            }
             jsonObject.addProperty("hotelId", hotelId);
-            ArrayList<Review> requiredReviews = new ArrayList<>();
-
-            TreeSet<Review> allReviews = threadSafeReviewHandler.findReviewsByHotelId(hotelId, true);
-
-            int count = 0;
-            for (Review review : allReviews) {
-                if (count == num) {
-                    break;
-                }
-                requiredReviews.add(review);
-                count++;
+            JsonArray jsonArr = threadSafeReviewHandler.findReviewsByHotelIdJson(hotelId, num);
+            if(jsonArr.size() == 0){
+                HttpRequest.send404JsonResponse("hotelId", writer);
             }
-
-
-
-
-            JsonArray jsonArray = new JsonArray();
-            for(Review review : requiredReviews){
-                JsonObject reviewObject = new JsonObject();
-                reviewObject.addProperty("reviewId", review.getReviewId());
-                reviewObject.addProperty("title", review.getTitle());
-                reviewObject.addProperty("user", review.getUserNickname());
-                reviewObject.addProperty("reviewText", review.getReviewText());
-                reviewObject.addProperty("date", review.getReviewSubmissionDate().toString());
-                jsonArray.add(reviewObject);
-            }
-            jsonObject.add("reviews", jsonArray);
+            jsonObject.add("reviews", jsonArr);
 
             HttpRequest.sendSuccessJsonResponse(jsonObject, writer);
-
-
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -87,12 +56,7 @@ public class ReviewHandler implements HttpHandler{
     }
     @Override
     public void setAttribute(Object data) {
-        HashMap<String, Object> dataMap = (HashMap<String, Object>) data;
+        this.threadSafeReviewHandler = (ThreadSafeReviewHandler) data;
 
-        assert dataMap.get(ThreadSafeHotelHandler.class.getName()) instanceof ThreadSafeHotelHandler;
-        threadSafeHotelHandler = (ThreadSafeHotelHandler) dataMap.get(ThreadSafeHotelHandler.class.getName());
-
-        assert dataMap.get(ThreadSafeReviewHandler.class.getName()) instanceof ThreadSafeReviewHandler;
-        threadSafeReviewHandler = (ThreadSafeReviewHandler) dataMap.get(ThreadSafeReviewHandler.class.getName());
     }
 }

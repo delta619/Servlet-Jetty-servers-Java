@@ -1,6 +1,7 @@
 package servers.jettyServer;
 
 import com.google.gson.Gson;
+import com.google.gson.JsonArray;
 import hotelapp.Review;
 import hotelapp.ThreadSafeHotelHandler;
 import hotelapp.ThreadSafeReviewHandler;
@@ -40,27 +41,15 @@ public class ReviewServlet extends HttpServlet {
             }
             int requiredCount = Integer.parseInt(num);
 
-            if(tsHotelHandler.findHotelId(hotelId) == null){
-                response.setStatus(HttpStatus.NOT_FOUND_404);
-                out.print(Helper.reviewResponseGenerator(false, null));
-                return;
-            }
 
-            TreeSet<Review> allReviews = tsReviewHandler.findReviewsByHotelId(hotelId, true);
+            JsonArray jsonArr = tsReviewHandler.findReviewsByHotelIdJson(hotelId, requiredCount);
 
-            requiredCount = Math.min(requiredCount, allReviews.size());
-            ArrayList<Review> requiredReviews = new ArrayList<>();
-            int count = 0;
-            for(Review review : allReviews){
-                if(count == requiredCount){
-                    break;
-                }
-                requiredReviews.add(review);
-                count++;
-            }
-
-
-            out.print(Helper.reviewResponseGenerator(true, requiredReviews));
+        if(jsonArr.size() == 0){
+            response.setStatus(HttpStatus.NOT_FOUND_404);
+            out.print(Helper.reviewResponseGenerator(false, null));
+            return;
+        }
+            out.print(Helper.reviewResponseGenerator(true, jsonArr));
             out.flush();
 
         } catch (Exception e){

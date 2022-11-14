@@ -1,5 +1,7 @@
 package hotelapp;
 
+import com.google.gson.JsonArray;
+
 import java.util.ArrayList;
 import java.util.TreeSet;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
@@ -47,10 +49,30 @@ public class ThreadSafeReviewHandler extends ReviewHandler {
     }
 
     @Override
+    public JsonArray findReviewsByHotelIdJson(String hotelId, int numReviews){
+        try{
+            lock.readLock().lock();
+            return super.findReviewsByHotelIdJson(hotelId, numReviews);
+        } finally {
+            lock.readLock().unlock();
+        }
+    }
+
+    @Override
     public ArrayList<ReviewWithFreq> findWords(String word){
         try{
             lock.readLock().lock();
             return super.findWords(word);
+        } finally {
+            lock.readLock().unlock();
+        }
+    }
+
+    @Override
+    public JsonArray findWordsJson(String word, int numReviews){
+        try{
+            lock.readLock().lock();
+            return super.findWordsJson(word, numReviews);
         } finally {
             lock.readLock().unlock();
         }

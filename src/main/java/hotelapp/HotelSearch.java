@@ -1,6 +1,8 @@
 package hotelapp;
 
+import servers.httpServer.HotelHandler;
 import servers.httpServer.HttpServer;
+import servers.httpServer.WeatherHandler;
 import servers.jettyServer.JettyServer;
 
 import java.util.HashMap;
@@ -57,7 +59,7 @@ public class HotelSearch {
 
         if(arg_map.get("-output") == null){
             reviewHandler.setUpWords();
-//            runJettyServer(hotelHandler, reviewHandler, threads);
+//            runJettyServer(hotelHandler, reviewHandler);
             runHttpServer(hotelHandler, reviewHandler, threads);
         }else{
             String outputFile = arg_map.get("-output");
@@ -136,17 +138,24 @@ public class HotelSearch {
             System.out.println("Something went wrong: " + e.getMessage());
         }
     }
-
     public static void runHttpServer(ThreadSafeHotelHandler tsHotelHandler, ThreadSafeReviewHandler tsReviewHandler, int threads) {
 
         HttpServer server = new HttpServer(threads);
-        server.addMapping(ThreadSafeHotelHandler.class.getName(), tsHotelHandler);
-        server.addMapping(ThreadSafeReviewHandler.class.getName(), tsReviewHandler);
-        server.setAttributeControllers();
+        server.addRouteMapping("/reviews", servers.httpServer.ReviewHandler.class.getName());
+        server.addRouteMapping("/hotelInfo", servers.httpServer.HotelHandler.class.getName());
+        server.addRouteMapping("/index", servers.httpServer.IndexHandler.class.getName());
+        server.addRouteMapping("/weather", servers.httpServer.WeatherHandler.class.getName());
+
+        server.addObjectMapping(servers.httpServer.HotelHandler.class.getName(), tsHotelHandler);
+        server.addObjectMapping(servers.httpServer.ReviewHandler.class.getName(), tsReviewHandler);
+        server.addObjectMapping(servers.httpServer.IndexHandler.class.getName(), tsReviewHandler);
+        server.addObjectMapping(servers.httpServer.WeatherHandler.class.getName(), tsHotelHandler);
+
+
         server.start();
 
     }
-    public static void runJettyServer(ThreadSafeHotelHandler tsHotelHandler, ThreadSafeReviewHandler tsReviewHandler, int threads){
+    public static void runJettyServer(ThreadSafeHotelHandler tsHotelHandler, ThreadSafeReviewHandler tsReviewHandler){
         try{
             JettyServer server = new JettyServer(tsHotelHandler, tsReviewHandler);
             server.start();

@@ -38,7 +38,7 @@ public class WeatherInfo extends HttpServlet {
             }
 
             String[] weatherInfo = getWeatherInfo(hotel.getLatitude(), hotel.getLongitude());
-            out.println(Helper.weatherResponseGenerator(true, tsHotelHandler.findHotelId(hotelId), weatherInfo[0], weatherInfo[1]));
+            out.println(Helper.weatherResponseGenerator(true, tsHotelHandler.getHotelInfoJson(hotelId), weatherInfo[0], weatherInfo[1]));
 
         } catch (IOException e) {
             e.printStackTrace();

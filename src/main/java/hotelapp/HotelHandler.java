@@ -1,5 +1,7 @@
 package hotelapp;
 
+import com.google.gson.JsonObject;
+
 import java.util.*;
 
 public class HotelHandler {
@@ -16,6 +18,21 @@ public class HotelHandler {
 
         Hotel hotel = this.hotelMap.get(hotelId);
         return hotel;
+    }
+    public JsonObject getHotelInfoJson(String hotelId){
+        JsonObject jsonObject  = new JsonObject();
+        Hotel hotel = findHotelId(hotelId);
+        if(hotel != null) {
+            jsonObject.addProperty("hotelId", hotel.getId());
+            jsonObject.addProperty("name", hotel.getName());
+            jsonObject.addProperty("addr", hotel.getAddress());
+            jsonObject.addProperty("city", hotel.getCity());
+            jsonObject.addProperty("state", hotel.getState());
+            jsonObject.addProperty("lat", hotel.getLatitude());
+            jsonObject.addProperty("lon", hotel.getLongitude());
+            return jsonObject;
+        }
+        return null;
     }
     public void writeOutput(ReviewHandler reviewHandlerOld, String outputFileName){
         for(String hotelId: this.hotelMap.keySet()){

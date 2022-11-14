@@ -97,28 +97,27 @@ public class WeatherHandler implements HttpHandler {
     }
 
     private void getHotelInfo(HttpRequest request, PrintWriter writer) {
-        // /weather?hotelId=25622
         try{
             String hotelId = request.params.get("hotelId");
             if(hotelId == null){
                 HttpRequest.send404JsonResponse("hotelId", writer);
                 return;
             }
-            Hotel hotel = threadSafeHotelHandler.findHotelId(hotelId);
-            if(hotel == null){
+            JsonObject hotelJsonObj = threadSafeHotelHandler.getHotelInfoJson(hotelId);
+            if(hotelJsonObj == null){
                 HttpRequest.send404JsonResponse("hotelId", writer);
                 return;
             }
-            String lat = hotel.getLatitude();
-            String lon = hotel.getLongitude();
+            String lat = hotelJsonObj.get("lat").getAsString();
+            String lon = hotelJsonObj.get("lon").getAsString();
 
             String[] weatherInfo = getWeatherInfo(lat, lon);
             String temperature = weatherInfo[0];
             String windspeed = weatherInfo[1];
 
             JsonObject jsonObject = new JsonObject();
-            jsonObject.addProperty("hotelId", hotel.getId());
-            jsonObject.addProperty("name", hotel.getName());
+            jsonObject.addProperty("hotelId", hotelJsonObj.get("hotelId").getAsString());
+            jsonObject.addProperty("name", hotelJsonObj.get("name").getAsString());
             jsonObject.addProperty("temperature", temperature);
             jsonObject.addProperty("windspeed", windspeed);
 
@@ -144,9 +143,6 @@ public class WeatherHandler implements HttpHandler {
 
     @Override
     public void setAttribute(Object data) {
-        HashMap<String, Object> dataMap = (HashMap<String, Object>) data;
-
-        assert dataMap.get(ThreadSafeHotelHandler.class.getName()) instanceof ThreadSafeHotelHandler;
-        threadSafeHotelHandler = (ThreadSafeHotelHandler) dataMap.get(ThreadSafeHotelHandler.class.getName());
+        this.threadSafeHotelHandler = (ThreadSafeHotelHandler) data;
     }
 }
