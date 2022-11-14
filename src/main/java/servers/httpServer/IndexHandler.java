@@ -21,13 +21,15 @@ public class IndexHandler implements HttpHandler {
         if(request.method.equals("GET")){
             getWordIndexReviews(request, writer);
             return;
-
         }
-
         send405Response("method", writer);
-
     }
 
+    /**
+     * This method handles the GET request for the word reviews
+     * @param request client's http request
+     * @param writer PrintWriter of the response
+     */
     private void getWordIndexReviews(HttpRequest request, PrintWriter writer) {
         // index?word=waffles&num=5
         try {

@@ -24,6 +24,9 @@ public class HttpRequest {
         Logger.getLogger("HttpRequest").info("Request: " + request);
     }
 
+    /**
+     * This method sets the route of the request by parsing the url
+     */
     public void setRoute(){
         if(url.contains("?")){
             this.route = url.substring(0, url.indexOf("?"));
@@ -32,10 +35,16 @@ public class HttpRequest {
         }
 
     }
+    /**
+     * This method gets the route for the handler
+     */
     public String getRoute(){
         return route;
     }
 
+    /**
+     * This method parses the url and gets the parameters
+     */
     private void getParams() {
         String[] urlParts = url.split("\\?");
         if(urlParts.length > 1) {
@@ -50,6 +59,11 @@ public class HttpRequest {
     }
 
 
+    /**
+     * This method sends a 200 OK response with the json object
+     * @param json JsonObject to be sent
+     * @param writer PrintWriter of the response
+     */
     public static void sendSuccessJsonResponse(JsonObject json, PrintWriter writer) {
         json.addProperty("success", true);
         writer.println("HTTP/1.1 200 OK");
@@ -61,6 +75,11 @@ public class HttpRequest {
     }
 
 
+    /**
+     * This method sends a 404 response with a json body
+     * @param key the key that was not found
+     * @param writer PrintWriter of the response
+     */
     public static void send404JsonResponse(String key, PrintWriter writer) {
 
         JsonObject json = new JsonObject();
@@ -77,6 +96,11 @@ public class HttpRequest {
 
     }
 
+    /**
+     * This method sends a 405 response to the client
+     * @param key key of the invalid parameter
+     * @param writer PrintWriter of the response
+     */
     public static void send405Response(String key, PrintWriter writer) {
 
         JsonObject json = new JsonObject();
@@ -91,6 +115,11 @@ public class HttpRequest {
         Logger.getLogger("HttpRequest").warning("Response: " + json);
     }
 
+    /**
+     * This method handles the GET request for the hotel info
+     * @param key the error key
+     * @param writer PrintWriter of the response
+     */
     public static void send500Response(String key, PrintWriter writer) {
 
         JsonObject json = new JsonObject();

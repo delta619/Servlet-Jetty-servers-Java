@@ -41,14 +41,29 @@ public class HttpServer {
         }
     }
 
+    /**
+     * This method adds a route to the routeMap
+     * @param route route to be added
+     * @param controller handler to be added
+     */
     public void addRouteMapping(String route, Object controller){
         this.routeMap.put(route, controller);
     }
 
+    /**
+     * This method adds an object to the objectMap
+     * @param className handlername of the route
+     * @param value object to be added
+     */
     public void addObjectMapping(String className, Object value) {
         this.ObjectMap.put(className, value);
     }
 
+    /**
+     * This method gets the handler/controller from the routemap as controller
+     * @param route handlername of the route
+     *
+     */
     public HttpHandler getController(String route) {
         try{
             Class<?> handlerClass = Class.forName(routeMap.get(route).toString());
@@ -64,6 +79,13 @@ public class HttpServer {
 
     return null;
     }
+
+    /**
+     * This method get the netry request from the client
+     *
+     * @param input input stream url
+     * @param out output stream
+     */
     private void processRequestEntry(String input, PrintWriter out){
         HttpRequest request;
         try{
@@ -95,6 +117,9 @@ public class HttpServer {
             this.connectionSocket = connectionSocket;
         }
 
+        /**
+         * This method gets the request from the client and process it
+         */
         @Override
         public void run() {
 

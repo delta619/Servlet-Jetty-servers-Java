@@ -28,7 +28,11 @@ public class ReviewHandler implements HttpHandler{
         send405Response("method", writer);
 
     }
-
+    /**
+     * This method handles the GET request for the hotel reviews
+     * @param request client's http request
+     * @param writer PrintWriter of the response
+     */
     private void getHotelReviews(HttpRequest request, PrintWriter writer) {
         try {
             JsonObject jsonObject = new JsonObject();

@@ -18,8 +18,12 @@ public class HotelHandler implements HttpHandler{
         send405Response("method", writer);
     }
 
+    /**
+     * This method handles the GET request for the hotel info
+     * @param request client's http request
+     * @param writer PrintWriter of the response
+     */
     private void getHotelInfo(HttpRequest request, PrintWriter writer) {
-        JsonObject jsonObject = new JsonObject();
 
         if (request.params.containsKey("hotelId")) {
             String hotelId = request.params.get("hotelId");
@@ -32,6 +36,10 @@ public class HotelHandler implements HttpHandler{
             send404JsonResponse("hotelId", writer);
     }
 
+    /**
+     * This method handles the GET request for the hotel info
+     * @param data Object that contains the Threadsafehoteldata data
+     */
     @Override
     public void setAttribute(Object data) {
         this.threadSafeHotelHandler = (ThreadSafeHotelHandler) data;

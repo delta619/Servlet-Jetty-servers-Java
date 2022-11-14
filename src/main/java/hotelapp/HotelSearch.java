@@ -59,8 +59,8 @@ public class HotelSearch {
 
         if(arg_map.get("-output") == null){
             reviewHandler.setUpWords();
-//            runJettyServer(hotelHandler, reviewHandler);
-            runHttpServer(hotelHandler, reviewHandler, threads);
+            runJettyServer(hotelHandler, reviewHandler);
+//            runHttpServer(hotelHandler, reviewHandler, threads);
         }else{
             String outputFile = arg_map.get("-output");
             Helper.createOutputFiles(outputFile);

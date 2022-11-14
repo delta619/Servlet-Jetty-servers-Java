@@ -41,7 +41,6 @@ public class ReviewServlet extends HttpServlet {
             }
             int requiredCount = Integer.parseInt(num);
 
-
             JsonArray jsonArr = tsReviewHandler.findReviewsByHotelIdJson(hotelId, requiredCount);
 
         if(jsonArr.size() == 0){
@@ -56,9 +55,6 @@ public class ReviewServlet extends HttpServlet {
 
             System.out.println("SOME Error occurred in get of reviews : "+ e.getMessage());
         }
-
-
-
 
     }
 }

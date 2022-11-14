@@ -17,6 +17,12 @@ public class WeatherHandler implements HttpHandler {
     ThreadSafeHotelHandler threadSafeHotelHandler;
 
 
+    /**
+     * This method handles the GET request for the weather info form 3rd party API
+     * @param latitude
+     * @param longitude
+     * @return String[] of weather info
+     */
     public String[] getWeatherInfo(String latitude, String longitude) {
         PrintWriter out = null;
         BufferedReader in = null;
@@ -77,6 +83,10 @@ public class WeatherHandler implements HttpHandler {
 
         return new String[]{"NA", "NA"};
     }
+    /**
+     * This method checks if the line contains the curly braces
+     * @return boolean
+     */
     public boolean checkBrack(String s){
         // if string contains curly braces, return true
 
@@ -86,6 +96,12 @@ public class WeatherHandler implements HttpHandler {
         return false;
     };
 
+    /**
+     * This method handles the GET request for the weather info
+     * @param host host of the 3rd party party API
+     * @param pathResourceQuery queryparams of the 3rd party party API
+     * @return
+     */
     private static String getRequest(String host, String pathResourceQuery) {
         String request = "GET " + pathResourceQuery + " HTTP/1.1" + System.lineSeparator() // GET
                 // request
@@ -96,6 +112,11 @@ public class WeatherHandler implements HttpHandler {
         return request;
     }
 
+    /**
+     * This method gets the hotel info from the ThreadSafeHotelHandler
+     * @param request client's http request
+     * @param writer PrintWriter of the response
+     */
     private void getHotelInfo(HttpRequest request, PrintWriter writer) {
         try{
             String hotelId = request.params.get("hotelId");

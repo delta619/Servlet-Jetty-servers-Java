@@ -45,6 +45,12 @@ public class WeatherInfo extends HttpServlet {
 
         }
     }
+    /**
+     * This method gets the weather info from the open-meteo api
+     * @param latitude latitude of the hotel
+     * @param longitude longitude of the hotel
+     * @return String array of the weather info
+     */
     public String[] getWeatherInfo(String latitude, String longitude) {
         PrintWriter out = null;
         BufferedReader in = null;
@@ -105,6 +111,11 @@ public class WeatherInfo extends HttpServlet {
 
        return new String[]{"NA", "NA"}; // 0 -> temperature 1 -> windspeed
     }
+    /**
+     * This method checks if the line contains a curly brace
+     * @param s line to check
+     * @return true if the line contains a curly brace
+     */
     public boolean checkBrack(String s){
         // if string contains curly braces, return true
 
